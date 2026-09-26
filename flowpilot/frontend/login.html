@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Log in — FlowPilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12151c; --panel:#1a1e28; --panel2:#1f2430; --line: rgba(243,241,235,0.12);
+    --text:#ece9e1; --text-dim:#9b9ea8;
+    --amber:#e8a33d; --amber-dim: rgba(232,163,61,0.16);
+    --danger:#e8683d; --danger-dim: rgba(232,104,61,0.14);
+    --radius:10px;
+    box-sizing:border-box;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  h1,.disp{font-family:'Space Grotesk',system-ui,sans-serif; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+  .card{
+    width:100%; max-width:400px; background:var(--panel); border:1px solid var(--line);
+    border-radius:16px; padding:36px 32px;
+  }
+  .logo{display:flex; align-items:center; gap:9px; font-family:'Space Grotesk'; font-weight:700; font-size:18px; margin-bottom:28px;}
+  .logo .mark{width:20px; height:20px;}
+  .logo .mark svg{width:100%; height:100%;}
+  h1{font-size:23px; font-weight:600; margin:0 0 6px;}
+  .sub{color:var(--text-dim); font-size:14.5px; margin:0 0 26px;}
+  label{display:block; font-size:13.5px; font-weight:500; margin-bottom:7px; color:var(--text-dim);}
+  input{
+    width:100%; padding:12px 13px; border-radius:8px; border:1px solid var(--line);
+    background:var(--panel2); color:var(--text); font-size:14.5px; font-family:inherit; margin-bottom:18px;
+  }
+  input:focus{outline:2px solid var(--amber); outline-offset:1px; border-color:transparent;}
+  .btn{
+    width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:13px 20px; border-radius:8px; font-size:15px; font-weight:600;
+    cursor:pointer; border:none; background:var(--amber); color:#1a1206;
+    transition:background .18s ease, opacity .18s ease;
+  }
+  .btn:hover{background:#f0ad4d;}
+  .btn:disabled{opacity:.6; cursor:not-allowed;}
+  .foot{margin-top:20px; text-align:center; font-size:13.5px; color:var(--text-dim);}
+  .foot a{color:var(--amber); font-weight:600;}
+  .alert{
+    display:none; background:var(--danger-dim); border:1px solid rgba(232,104,61,0.35); color:#f2ab8f;
+    font-size:13.5px; padding:11px 14px; border-radius:8px; margin-bottom:18px;
+  }
+  .alert.show{display:block;}
+  .demo-hint{
+    background:var(--amber-dim); border:1px solid rgba(232,163,61,0.3); color:var(--amber);
+    font-size:12.5px; padding:10px 13px; border-radius:8px; margin-bottom:20px; display:none;
+  }
+  .demo-hint.show{display:block;}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <a href="index.html" class="logo">
+    <span class="mark"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10c2-5 5-7 8-7s6 2 8 7c-2 5-5 7-8 7s-6-2-8-7Z" stroke="#E8A33D" stroke-width="1.6"/><circle cx="10" cy="10" r="2" fill="#E8A33D"/></svg></span>
+    FlowPilot
+  </a>
+  <h1>Welcome back</h1>
+  <p class="sub">Log in to your workspace.</p>
+
+  <div class="demo-hint" id="demoHint">Demo login pre-filled — just hit "Log in". (Run <code>npm run seed</code> on the backend first to create this account.)</div>
+  <div class="alert" id="alertBox"></div>
+
+  <form id="loginForm">
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" placeholder="you@company.com" required>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="••••••••" required>
+
+    <button type="submit" class="btn" id="submitBtn">Log in</button>
+  </form>
+
+  <div class="foot">No account yet? <a href="signup.html">Start free</a></div>
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('demo') === '1') {
+    document.getElementById('email').value = 'demo@flowpilot.com';
+    document.getElementById('password').value = 'Demo12345!';
+    document.getElementById('demoHint').classList.add('show');
+  }
+
+  const form = document.getElementById('loginForm');
+  const alertBox = document.getElementById('alertBox');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function showError(msg) {
+    alertBox.textContent = msg;
+    alertBox.classList.add('show');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    alertBox.classList.remove('show');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Logging in...';
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value,
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showError(data.message || 'Login failed.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Log in';
+        return;
+      }
+
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      showError('Could not reach the server. Is the backend running?');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Log in';
+    }
+  });
+</script>
+</body>
+</html>

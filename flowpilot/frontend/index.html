@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FlowPilot — Automate Your Business</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12151c; --panel:#1a1e28; --panel2:#1f2430; --line: rgba(243,241,235,0.12);
+    --paper:#f3f1eb; --paper2:#eae7de;
+    --text:#ece9e1; --text-dim:#9a9c a6; --text-dim:#9b9ea8;
+    --amber:#e8a33d; --amber-dim: rgba(232,163,61,0.16);
+    --ink-text:#1a1c22; --ink-dim:#5b5d66;
+    --radius:10px;
+    box-sizing:border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]){ }
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth; scroll-padding-top: calc(72px + env(safe-area-inset-top,0px));}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.disp{font-family:'Space Grotesk',system-ui,sans-serif; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%;}
+  .wrap{max-width:1140px; margin:0 auto; padding:0 28px;}
+  .row{display:flex; align-items:center;}
+  section{overflow-x:hidden;}
+
+  /* ---------- Motion & focus ---------- */
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px; border-radius:4px;}
+
+  /* ---------- Nav ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    padding-top: env(safe-area-inset-top, 0px);
+    background:rgba(18,21,28,0.86); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{height:72px; display:flex; align-items:center; justify-content:space-between;}
+  .logo{display:flex; align-items:center; gap:9px; font-family:'Space Grotesk'; font-weight:700; font-size:18px;}
+  .logo .mark{width:20px; height:20px; position:relative;}
+  .logo .mark svg{width:100%; height:100%;}
+  .navlinks{display:flex; gap:32px; font-size:14.5px; color:var(--text-dim);}
+  .navlinks a{transition:color .18s ease;}
+  .navlinks a:hover{color:var(--text);}
+  .navcta{display:flex; gap:12px; align-items:center;}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px 20px; border-radius:7px; font-size:14.5px; font-weight:600;
+    cursor:pointer; border:1px solid transparent; transition:transform .15s ease, background .18s ease, border-color .18s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-ghost{color:var(--text); border-color:var(--line);}
+  .btn-ghost:hover{border-color:rgba(243,241,235,0.32);}
+  .btn-amber{background:var(--amber); color:#1a1206;}
+  .btn-amber:hover{background:#f0ad4d;}
+  .btn-lg{padding:14px 26px; font-size:15.5px;}
+  .navmobile{display:none; background:transparent; border:none; color:var(--text); font-size:22px; cursor:pointer;}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:96px 0 90px; position:relative;}
+  .hero-grid{display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center;}
+  .eyebrow-row{display:flex; align-items:center; gap:10px; margin-bottom:22px; color:var(--text-dim); font-size:13.5px;}
+  .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--amber); box-shadow:0 0 0 4px var(--amber-dim);}
+  .hero h1{font-size:52px; font-weight:600; line-height:1.08; margin:0 0 22px; max-width:560px;}
+  .hero p.lead{font-size:17.5px; color:var(--text-dim); max-width:460px; margin:0 0 34px;}
+  .hero-ctas{display:flex; gap:14px; margin-bottom:38px;}
+  .hero-meta{display:flex; gap:26px; font-size:13px; color:var(--text-dim);}
+  .hero-meta span{display:flex; align-items:center; gap:7px;}
+  .hero-meta svg{width:14px; height:14px; stroke:var(--amber);}
+
+  /* Pipeline visual */
+  .pipeline{
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:30px 26px 34px; position:relative;
+  }
+  .pipeline-label{font-size:12.5px; color:var(--text-dim); margin-bottom:22px; display:flex; justify-content:space-between;}
+  .pipeline-track{position:relative; display:flex; flex-direction:column; gap:0;}
+  .pnode{
+    display:flex; align-items:center; gap:14px; padding:16px 16px; border-radius:10px;
+    background:var(--panel2); border:1px solid var(--line); position:relative; z-index:2;
+  }
+  .pnode .ic{
+    width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    background:rgba(232,163,61,0.14); flex:none;
+  }
+  .pnode .ic svg{width:17px; height:17px; stroke:var(--amber); fill:none;}
+  .pnode strong{display:block; font-size:14.5px; font-weight:600;}
+  .pnode span{display:block; font-size:12.5px; color:var(--text-dim); margin-top:1px;}
+  .pconnector{height:34px; margin-left:33px; width:1px; position:relative; background:var(--line);}
+  .pconnector .pulse{
+    position:absolute; left:-3px; top:-6px; width:7px; height:7px; border-radius:50%;
+    background:var(--amber); box-shadow:0 0 8px 2px var(--amber);
+    animation:travel 3.6s cubic-bezier(.4,0,.2,1) infinite;
+  }
+  .pconnector.c2 .pulse{animation-delay:1.2s;}
+  @keyframes travel{
+    0%{top:-6px; opacity:0;}
+    8%{opacity:1;}
+    92%{opacity:1;}
+    100%{top:100%; opacity:0;}
+  }
+  .pipeline-foot{margin-top:20px; padding-top:18px; border-top:1px dashed var(--line); font-size:12.5px; color:var(--text-dim); display:flex; justify-content:space-between;}
+  .pipeline-foot b{color:var(--amber); font-weight:600;}
+
+  /* ---------- Trusted ---------- */
+  .trusted{padding:38px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .trusted .wrap{display:flex; align-items:center; gap:40px; flex-wrap:wrap; justify-content:space-between;}
+  .trusted-label{font-size:12.5px; color:var(--text-dim); flex:none;}
+  .tlogos{display:flex; gap:38px; flex-wrap:wrap; align-items:center;}
+  .tlogos span{font-family:'Space Grotesk'; font-weight:600; font-size:16px; color:var(--text-dim); opacity:.7;}
+
+  /* ---------- Section shell ---------- */
+  .section{padding:100px 0;}
+  .section-head{max-width:560px; margin-bottom:52px;}
+  .section-head h2{font-size:34px; font-weight:600; margin:0 0 14px; line-height:1.18;}
+  .section-head p{color:var(--text-dim); font-size:16px; margin:0;}
+  .light{background:var(--paper); color:var(--ink-text);}
+  .light .section-head p{color:var(--ink-dim);}
+  .light h2, .light h3{color:var(--ink-text);}
+
+  /* ---------- Features ---------- */
+  .feat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  .feat{background:var(--panel); padding:30px 26px; transition:background .2s ease;}
+  .feat:hover{background:var(--panel2);}
+  .feat .ic{width:36px; height:36px; border-radius:9px; background:rgba(232,163,61,0.14); display:flex; align-items:center; justify-content:center; margin-bottom:18px;}
+  .feat .ic svg{width:18px; height:18px; stroke:var(--amber); fill:none;}
+  .feat h3{font-size:16.5px; margin:0 0 8px; font-weight:600;}
+  .feat p{font-size:14.5px; color:var(--text-dim); margin:0; line-height:1.55;}
+
+  /* ---------- How it works ---------- */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:30px;}
+  .step{padding-top:20px; border-top:1px solid rgba(26,28,34,0.16); position:relative;}
+  .step .num{font-family:'Space Grotesk'; font-size:13px; color:var(--amber); font-weight:600; margin-bottom:12px; display:block;}
+  .step h3{font-size:17px; margin:0 0 8px; font-weight:600;}
+  .step p{font-size:14.5px; color:var(--ink-dim); margin:0;}
+
+  /* ---------- Automation builder mock ---------- */
+  .builder{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:8px; }
+  .builder-top{display:flex; justify-content:space-between; align-items:center; padding:16px 18px 14px;}
+  .builder-top .wname{font-size:14.5px; font-weight:600;}
+  .builder-top .wsub{font-size:12px; color:var(--text-dim); margin-top:2px;}
+  .btag{font-size:11.5px; padding:5px 10px; border-radius:6px; background:rgba(120,200,140,0.14); color:#8fd6a4; border:1px solid rgba(120,200,140,0.22);}
+  .bflow{display:flex; align-items:stretch; gap:0; padding:6px 14px 20px; overflow-x:auto;}
+  .bnode{
+    min-width:190px; background:var(--panel2); border:1px solid var(--line); border-radius:10px;
+    padding:16px; flex:none;
+  }
+  .bnode .btype{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;}
+  .bnode strong{display:block; font-size:14px; font-weight:600; margin-bottom:4px;}
+  .bnode span{font-size:12.5px; color:var(--text-dim);}
+  .barrow{width:46px; flex:none; display:flex; align-items:center; justify-content:center; color:var(--text-dim);}
+  .barrow svg{width:20px; height:20px;}
+
+  /* ---------- Analytics preview ---------- */
+  .an-grid{display:grid; grid-template-columns:1fr 1.3fr; gap:24px;}
+  .an-card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:24px;}
+  .an-stat{margin-bottom:22px;}
+  .an-stat .v{font-family:'Space Grotesk'; font-size:28px; font-weight:600;}
+  .an-stat .l{font-size:12.5px; color:var(--text-dim); margin-top:2px;}
+  .chart-card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:24px;}
+  .chart-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px;}
+  .chart-head h3{font-size:14.5px; margin:0; font-weight:600;}
+  .chart-head span{font-size:12px; color:var(--text-dim);}
+  .bars{display:flex; align-items:flex-end; gap:10px; height:140px;}
+  .bars .bar{flex:1; background:linear-gradient(180deg, var(--amber), rgba(232,163,61,0.35)); border-radius:4px 4px 0 0; opacity:.9;}
+
+  /* ---------- Testimonials ---------- */
+  .test-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
+  .test{background:var(--panel2); border:1px solid var(--line); border-radius:14px; padding:26px;}
+  .test p{font-size:15px; line-height:1.6; margin:0 0 20px; color:var(--text);}
+  .test .who{display:flex; align-items:center; gap:10px;}
+  .avatar{width:34px; height:34px; border-radius:50%; background:var(--amber-dim); color:var(--amber); font-family:'Space Grotesk'; font-weight:600; font-size:13px; display:flex; align-items:center; justify-content:center;}
+  .who b{display:block; font-size:13.5px;}
+  .who span{display:block; font-size:12px; color:var(--text-dim);}
+
+  /* ---------- Pricing ---------- */
+  .price-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px; align-items:stretch;}
+  .plan{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:30px 26px; display:flex; flex-direction:column;}
+  .plan.hi{border-color:var(--amber); background:linear-gradient(180deg, rgba(232,163,61,0.07), var(--panel) 40%); position:relative;}
+  .plan .tag{position:absolute; top:-11px; left:26px; background:var(--amber); color:#1a1206; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:6px;}
+  .plan h3{font-size:16px; margin:0 0 6px; font-weight:600;}
+  .plan .price{font-family:'Space Grotesk'; font-size:34px; font-weight:600; margin:6px 0 4px;}
+  .plan .price small{font-size:14px; font-weight:400; color:var(--text-dim);}
+  .plan .pdesc{font-size:13.5px; color:var(--text-dim); margin-bottom:22px;}
+  .plan ul{list-style:none; padding:0; margin:0 0 26px; flex:1;}
+  .plan li{display:flex; gap:10px; font-size:14px; padding:8px 0; color:var(--text-dim); border-top:1px solid var(--line);}
+  .plan li:first-child{border-top:none;}
+  .plan li svg{width:15px; height:15px; stroke:var(--amber); flex:none; margin-top:2px;}
+  .plan .btn{width:100%;}
+
+  /* ---------- FAQ ---------- */
+  .faq{max-width:720px;}
+  .faq-item{border-top:1px solid var(--line); padding:20px 0;}
+  .faq-item:last-child{border-bottom:1px solid var(--line);}
+  .faq-q{display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:20px;}
+  .faq-q h4{font-size:15.5px; font-weight:600; margin:0;}
+  .faq-q .plus{width:18px; height:18px; flex:none; position:relative;}
+  .faq-q .plus::before, .faq-q .plus::after{content:""; position:absolute; background:var(--text-dim); transition:transform .25s ease;}
+  .faq-q .plus::before{width:100%; height:1.5px; top:50%; left:0; margin-top:-0.75px;}
+  .faq-q .plus::after{height:100%; width:1.5px; left:50%; top:0; margin-left:-0.75px;}
+  .faq-item.open .plus::after{transform:rotate(90deg);}
+  .faq-a{max-height:0; overflow:hidden; transition:max-height .3s ease;}
+  .faq-a p{font-size:14.5px; color:var(--text-dim); margin:14px 0 0; max-width:600px;}
+
+  /* ---------- Final CTA ---------- */
+  .cta-final{padding:110px 0; text-align:center;}
+  .cta-final h2{font-size:38px; margin:0 0 16px;}
+  .cta-final p{color:var(--text-dim); margin:0 0 34px; font-size:16px;}
+  .cta-final .hero-ctas{justify-content:center;}
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--line); padding:52px 0 36px;}
+  .foot-grid{display:grid; grid-template-columns:1.4fr repeat(3,1fr); gap:30px; margin-bottom:44px;}
+  .foot-brand p{font-size:13.5px; color:var(--text-dim); max-width:220px; margin-top:12px;}
+  .foot-col h5{font-size:12.5px; color:var(--text-dim); margin:0 0 14px; font-weight:500;}
+  .foot-col a{display:block; font-size:13.5px; color:var(--text); opacity:.85; margin-bottom:11px;}
+  .foot-col a:hover{opacity:1; color:var(--amber);}
+  .foot-bottom{display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); border-top:1px solid var(--line); padding-top:24px; flex-wrap:wrap; gap:10px;}
+
+  @media (max-width:880px){
+    .navlinks{display:none;}
+    .navmobile{display:block;}
+    .hero-grid{grid-template-columns:1fr; gap:44px;}
+    .hero h1{font-size:38px;}
+    .feat-grid, .steps, .test-grid, .price-grid{grid-template-columns:1fr;}
+    .an-grid{grid-template-columns:1fr;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+    .section{padding:70px 0;}
+    .hero{padding:56px 0 60px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <nav>
+      <div class="logo">
+        <span class="mark"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10c2-5 5-7 8-7s6 2 8 7c-2 5-5 7-8 7s-6-2-8-7Z" stroke="#E8A33D" stroke-width="1.6"/><circle cx="10" cy="10" r="2" fill="#E8A33D"/></svg></span>
+        FlowPilot
+      </div>
+      <div class="navlinks">
+        <a href="#features">Features</a>
+        <a href="#automations">Automation</a>
+        <a href="#analytics">Analytics</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="navcta">
+        <a href="login.html" class="btn btn-ghost">Log in</a>
+        <a href="signup.html" class="btn btn-amber">Start free</a>
+      </div>
+      <button class="navmobile" aria-label="Menu">☰</button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow-row"><span class="eyebrow-dot"></span> Now with AI workflow automation</div>
+      <h1>Automate your business. Focus on what matters.</h1>
+      <p class="lead">FlowPilot brings projects, clients and repetitive busywork into one place — then hands the busywork to AI, so your team spends its time on the work only humans can do.</p>
+      <div class="hero-ctas">
+        <a href="signup.html" class="btn btn-amber btn-lg">Start free</a>
+        <a href="login.html?demo=1" class="btn btn-ghost btn-lg">View demo</a>
+      </div>
+      <div class="hero-meta">
+        <span><svg viewBox="0 0 24 24" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> No credit card required</span>
+        <span><svg viewBox="0 0 24 24" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Set up in under 10 minutes</span>
+      </div>
+    </div>
+
+    <div class="pipeline">
+      <div class="pipeline-label"><span>Workflow · New client onboarding</span><span>Live</span></div>
+      <div class="pipeline-track">
+        <div class="pnode">
+          <div class="ic"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 2 3 7l9 5 9-5-9-5Z"/><path d="M3 12l9 5 9-5"/></svg></div>
+          <div><strong>Trigger</strong><span>New client added to FlowPilot</span></div>
+        </div>
+        <div class="pconnector c1"><div class="pulse"></div></div>
+        <div class="pnode">
+          <div class="ic"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="3.4"/></svg></div>
+          <div><strong>AI processing</strong><span>Drafts onboarding email &amp; task list</span></div>
+        </div>
+        <div class="pconnector c2"><div class="pulse"></div></div>
+        <div class="pnode">
+          <div class="ic"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M4 7l8 6 8-6"/></svg></div>
+          <div><strong>Action</strong><span>Email sent, 4 tasks created</span></div>
+        </div>
+      </div>
+      <div class="pipeline-foot"><span>Runs today</span><b>128</b></div>
+    </div>
+  </div>
+</section>
+
+<div class="trusted">
+  <div class="wrap">
+    <span class="trusted-label">Trusted by operations teams at</span>
+    <div class="tlogos"><span>Northwind</span><span>Halcyon</span><span>Basecamp&nbsp;Studio</span><span>Ferra</span><span>Loom&nbsp;&amp;&nbsp;Co</span></div>
+  </div>
+</div>
+
+<section class="section" id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Everything operations needs, nothing it doesn't</h2>
+      <p>Projects, tasks and clients live in one workspace — connected, not siloed.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg></div><h3>Project management</h3><p>Plan, assign and track work with statuses that match how your team actually operates.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="5" width="7" height="5" rx="1"/><rect x="14" y="5" width="7" height="5" rx="1"/><rect x="8.5" y="14" width="7" height="5" rx="1"/></svg></div><h3>Kanban task boards</h3><p>Move work forward visually, filter by assignee, project or priority in a click.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c1-4 3.5-6 6.5-6s5.5 2 6.5 6"/><circle cx="18" cy="9" r="2.4"/><path d="M15.7 14c2.2.4 3.8 2 4.6 5"/></svg></div><h3>Client CRM</h3><p>Every project, task and email tied to a client profile — no more digging through inboxes.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="3.4"/></svg></div><h3>AI automations</h3><p>Turn repeatable processes into workflows that run themselves, safely.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M4 19V9M11 19V4M18 19v-6"/></svg></div><h3>Live analytics</h3><p>See completion rates, automation runs and client growth without exporting a thing.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 4v14"/></svg></div><h3>Team &amp; roles</h3><p>Owner, admin and member roles keep access exactly where it should be.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section light">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>How it works</h2>
+      <p>From signup to your first automated workflow in three steps.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="num">01</span><h3>Set up your workspace</h3><p>Import clients and projects, or start fresh — invite your team in seconds.</p></div>
+      <div class="step"><span class="num">02</span><h3>Build a workflow</h3><p>Pick a trigger, let AI draft the action, and connect it to a real outcome.</p></div>
+      <div class="step"><span class="num">03</span><h3>Let it run</h3><p>FlowPilot executes the workflow and logs every run for you to review.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="automations">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>AI automation, built for real operations</h2>
+      <p>Chain a trigger, an AI step and an action — FlowPilot handles the rest.</p>
+    </div>
+    <div class="builder">
+      <div class="builder-top">
+        <div><div class="wname">Follow up with leads</div><div class="wsub">Runs when a lead goes 3 days without contact</div></div>
+        <span class="btag">Active</span>
+      </div>
+      <div class="bflow">
+        <div class="bnode"><div class="btype">Trigger</div><strong>Lead inactive 3 days</strong><span>Checked hourly</span></div>
+        <div class="barrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+        <div class="bnode"><div class="btype">AI processing</div><strong>Draft follow-up email</strong><span>Matches your tone of voice</span></div>
+        <div class="barrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+        <div class="bnode"><div class="btype">Action</div><strong>Send &amp; log activity</strong><span>Adds a follow-up task</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section light" id="analytics">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Know where the business stands</h2>
+      <p>Analytics pulled straight from your workspace — no spreadsheets required.</p>
+    </div>
+    <div class="an-grid">
+      <div class="an-card">
+        <div class="an-stat"><div class="v">142</div><div class="l">Active projects</div></div>
+        <div class="an-stat"><div class="v">1,284</div><div class="l">Tasks completed this month</div></div>
+        <div class="an-stat"><div class="v">96%</div><div class="l">Automation success rate</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><h3>Automation runs</h3><span>Last 7 days</span></div>
+        <div class="bars">
+          <div class="bar" style="height:42%"></div>
+          <div class="bar" style="height:58%"></div>
+          <div class="bar" style="height:38%"></div>
+          <div class="bar" style="height:71%"></div>
+          <div class="bar" style="height:64%"></div>
+          <div class="bar" style="height:88%"></div>
+          <div class="bar" style="height:76%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Teams run leaner with FlowPilot</h2>
+      <p>Agencies and ops teams replacing five tools with one workspace.</p>
+    </div>
+    <div class="test-grid">
+      <div class="test"><p>"We cut client onboarding time from two days to about twenty minutes. The AI drafts are good enough to send as-is most of the time."</p><div class="who"><div class="avatar">RS</div><div><b>Rania S.</b><span>Ops Lead, Halcyon</span></div></div></div>
+      <div class="test"><p>"Our whole agency runs out of FlowPilot now — projects, clients, invoicing follow-ups. It's the first tool the whole team actually opens daily."</p><div class="who"><div class="avatar">DK</div><div><b>Dev K.</b><span>Founder, Ferra Studio</span></div></div></div>
+      <div class="test"><p>"The automation builder is the first one I've used that a non-technical teammate can actually maintain without me."</p><div class="who"><div class="avatar">MT</div><div><b>Mara T.</b><span>COO, Northwind</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section light" id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Simple, workspace-based pricing</h2>
+      <p>Every plan includes unlimited projects and clients.</p>
+    </div>
+    <div class="price-grid">
+      <div class="plan">
+        <h3>Starter</h3>
+        <div class="price">$0<small>/mo</small></div>
+        <div class="pdesc">For freelancers getting organized.</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Up to 3 team members</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>2 active automations</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Core analytics</li>
+        </ul>
+        <a href="signup.html" class="btn btn-ghost">Start free</a>
+      </div>
+      <div class="plan hi">
+        <span class="tag">Most popular</span>
+        <h3>Growth</h3>
+        <div class="price">$39<small>/mo</small></div>
+        <div class="pdesc">For small teams and agencies.</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Up to 15 team members</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Unlimited automations</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Full analytics &amp; exports</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Priority support</li>
+        </ul>
+        <a href="signup.html" class="btn btn-amber">Start free</a>
+      </div>
+      <div class="plan">
+        <h3>Scale</h3>
+        <div class="price">Custom</div>
+        <div class="pdesc">For larger operations teams.</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Unlimited members</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Custom AI workflows</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Dedicated onboarding</li>
+        </ul>
+        <a href="mailto:hello@flowpilot.app?subject=Scale%20plan%20inquiry" class="btn btn-ghost">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Frequently asked questions</h2>
+      <p>Can't find what you're looking for? Reach out and we'll help directly.</p>
+    </div>
+    <div class="faq">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)"><h4>Do I need to connect my own AI provider?</h4><span class="plus"></span></div>
+        <div class="faq-a"><p>No — FlowPilot works out of the box. If you'd like to use your own model provider, that can be connected in workspace settings.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)"><h4>Can I import existing clients and projects?</h4><span class="plus"></span></div>
+        <div class="faq-a"><p>Yes, via CSV import during setup, or by connecting an existing tool through our migration assistant.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)"><h4>What happens if an automation fails?</h4><span class="plus"></span></div>
+        <div class="faq-a"><p>Every run is logged. Failed runs notify the workspace owner and can be retried or edited before re-running.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)"><h4>Is there a limit on team members?</h4><span class="plus"></span></div>
+        <div class="faq-a"><p>Starter supports up to 3 members. Growth and Scale plans support larger teams — see pricing above.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-final light">
+  <div class="wrap">
+    <h2>Ready to put your operations on autopilot?</h2>
+    <p>Start free — no credit card, cancel anytime.</p>
+    <div class="hero-ctas">
+      <a href="signup.html" class="btn btn-amber btn-lg">Start free</a>
+      <a href="login.html?demo=1" class="btn btn-ghost btn-lg">View demo</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="logo">
+          <span class="mark"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10c2-5 5-7 8-7s6 2 8 7c-2 5-5 7-8 7s-6-2-8-7Z" stroke="#E8A33D" stroke-width="1.6"/><circle cx="10" cy="10" r="2" fill="#E8A33D"/></svg></span>
+          FlowPilot
+        </div>
+        <p>Business operations and workflow automation for small teams that move fast.</p>
+      </div>
+      <div class="foot-col"><h5>Product</h5><a href="#features">Features</a><a href="#automations">Automation</a><a href="#pricing">Pricing</a><a href="#analytics">Analytics</a></div>
+      <div class="foot-col"><h5>Company</h5><a href="#">About</a><a href="#">Careers</a><a href="#">Blog</a><a href="#">Contact</a></div>
+      <div class="foot-col"><h5>Legal</h5><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Security</a></div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 FlowPilot. All rights reserved.</span>
+      <span>Made for operations teams everywhere.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function toggleFaq(q){
+    var item = q.parentElement;
+    var open = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(function(i){
+      i.classList.remove('open');
+      i.querySelector('.faq-a').style.maxHeight = null;
+    });
+    if(!open){
+      item.classList.add('open');
+      var a = item.querySelector('.faq-a');
+      a.style.maxHeight = a.scrollHeight + 'px';
+    }
+  }
+</script>
+</body>
+</html>
