@@ -90,6 +90,7 @@
   <div class="foot">Already have an account? <a href="login.html">Log in</a></div>
 </div>
 
+<script src="config.js"></script>
 <script>
   const form = document.getElementById('signupForm');
   const alertBox = document.getElementById('alertBox');
@@ -107,7 +108,7 @@
     submitBtn.textContent = 'Creating your workspace...';
 
     try {
-      const res = await fetch('/api/auth/signup', {
+      const res = await fetch(API_BASE + '/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

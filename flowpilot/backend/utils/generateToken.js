@@ -5,12 +5,13 @@ function generateToken(res, userId) {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
 
-  res.cookie('flowpilot_token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  });
+  const isProd = process.env.NODE_ENV === 'production';
+res.cookie('flowpilot_token', token, {
+  httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? 'none' : 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+});
 
   return token;
 }

@@ -100,7 +100,12 @@ async function login(req, res, next) {
 
 // POST /api/auth/logout
 function logout(req, res) {
-  res.clearCookie('flowpilot_token');
+  const isProd = process.env.NODE_ENV === 'production';
+  res.clearCookie('flowpilot_token', {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+  });
   res.json({ message: 'Logged out.' });
 }
 
